@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🥟 Momos Stall Tracker</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0f0f0f;
+    color: #f1f1f1;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2a1500 100%);
+    padding: 20px 16px 12px;
+    border-bottom: 2px solid #ff6b00;
+  }
+  .header h1 { font-size: 22px; font-weight: 800; color: #ff6b00; }
+  .header p  { font-size: 12px; color: #888; margin-top: 2px; }
+  .header input[type="date"] {
+    margin-top: 10px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: #1a1a1a;
+    border-bottom: 1px solid #222;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 12px 4px;
+    border: none;
+    background: transparent;
+    color: #888;
+    border-bottom: 2px solid transparent;
+    font-size: 11px;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    color: #ff6b00;
+    border-bottom: 2px solid #ff6b00;
+    font-weight: 700;
+  }
+
+  /* CONTENT */
+  .content { padding: 16px 14px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* CARDS */
+  .card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  /* INPUTS */
+  input[type="number"], input[type="text"] {
+    width: 100%;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    color: #fff;
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 14px;
+  }
+  input:focus { outline: none; border-color: #ff6b00; }
+  label { font-size: 10px; color: #666; display: block; margin-bottom: 4px; }
+
+  /* GRID */
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  /* SECTION TITLE */
+  .section-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .section-sub { font-size: 12px; color: #888; }
+
+  /* ITEM CARDS (Sales) */
+  .item-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .item-name { font-weight: 700; margin-bottom: 10px; }
+  .item-hint { margin-top: 8px; font-size: 12px; color: #888; }
+
+  /* SUMMARY BAR */
+  .summary-bar {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .summary-num { font-size: 22px; font-weight: 800; }
+  .summary-lbl { font-size: 10px; color: #666; }
+
+  /* RESULT ROW */
+  .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: #eee;
+  }
+
+  /* RESULT CARD SECTIONS */
+  .result-section {
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+  .result-section-title {
+    font-weight: 700;
+    font-size: 12px;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+  }
+
+  /* NET PROFIT BOX */
+  .net-box {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .net-calc-title { font-weight: 700; margin-bottom: 10px; color: #aaa; font-size: 12px; }
+  .net-total {
+    border-top: 2px solid #333;
+    margin-top: 8px;
+    padding-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    font-weight: 900;
+    font-size: 22px;
+  }
+  .per-person {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    background: #111;
+    border-radius: 8px;
+    padding: 10px 12px;
+  }
+
+  /* STATUS */
+  .status-center { text-align: center; margin-bottom: 16px; }
+  .status-date { font-size: 13px; color: #888; }
+  .status-text { font-size: 28px; font-weight: 900; margin-top: 4px; }
+
+  /* BUTTONS */
+  .btn-orange {
+    background: #ff6b00;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    font-size: 14px;
+    margin-top: 4px;
+  }
+  .btn-small {
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* DRAWING ENTRY */
+  .drawing-entry {
+    background: #1a1a1a;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .drawing-name { font-weight: 700; }
+  .drawing-reason { font-size: 11px; color: #888; margin-top: 2px; }
+  .drawing-amount { font-weight: 800; font-size: 18px; }
+  .drawing-btns { display: flex; gap: 6px; margin-top: 4px; justify-content: flex-end; }
+
+  /* EXPENSE BREAKDOWN */
+  .exp-breakdown {
+    background: #111;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+    margin-top: 12px;
+  }
+  .exp-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .exp-total {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #333;
+    padding-top: 6px;
+    font-weight: 700;
+  }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; color: #444; padding: 30px; }
+
+  /* WARNING BOX */
+  .warning-box {
+    background: #1a1200;
+    border: 1px solid #f59e0b;
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  /* TOTAL REVENUE */
+  .total-revenue {
+    margin-top: 10px;
+    text-align: right;
+    font-size: 16px;
+    font-weight: 700;
+    color: #22c55e;
+  }
+
+  /* SAVE BADGE */
+  .save-badge {
+    display: inline-block;
+    background: #1a3a1a;
+    color: #22c55e;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 8px;
+  }
+
+  /* HISTORY LIST */
+  .history-item {
+    background: #1a1a1a;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    border-left: 3px solid #ff6b00;
+  }
+  .history-item:hover { background: #222; }
+  .history-date { font-weight: 700; font-size: 13px; }
+  .history-plates { font-size: 11px; color: #888; margin-top: 2px; }
+
+  /* SCROLLABLE HISTORY */
+  .history-scroll { max-height: 300px; overflow-y: auto; }
+
+  /* NOTIFICATION */
+  #save-notif {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #22c55e;
+    color: #000;
+    font-weight: 700;
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-size: 13px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 999;
+    pointer-events: none;
+  }
+  #save-notif.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <h1>🥟 Momos Stall Tracker</h1>
+  <p>4 Partners • ₹15,000 Setup Recovery <span class="save-badge">💾 Auto Save</span></p>
+  <input type="date" id="main-date" onchange="onDateChange()">
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('sales', this)">🍱 Sales</button>
+  <button class="tab-btn" onclick="switchTab('expenses', this)">💸 Expenses</button>
+  <button class="tab-btn" onclick="switchTab('drawings', this)">💵 Drawing</button>
+  <button class="tab-btn" onclick="switchTab('result', this)">📊 Result</button>
+  <button class="tab-btn" onclick="switchTab('history', this)">📂 History</button>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- ===== SALES TAB ===== -->
+  <div id="page-sales" class="page active">
+    <div class="section-title">
+      <span>🍱 Aaj ki Sales</span>
+      <span class="section-sub">Kitna bana, kitna bika</span>
+    </div>
+
+    <!-- Steam Veg -->
+    <div class="item-card" style="border-left: 3px solid #22c55e">
+      <div class="item-name" style="color:#22c55e">🥟 Steam Veg</div>
+      <div class="grid-3">
+        <div><label>Price/Plate (₹)</label><input type="number" id="sv-price" placeholder="0" oninput="updateCalc()"></div>
+        <div><label>Plates Bani</label><input type="number" id="sv-made" placeholder="0" oninput="updateCalc()"></div>
+        <div><label>Plates Biki</label><input type="number" id="sv-sold" placeholder="0" oninput="updateCalc()"></div>
+      </div>
+      <div class="item-hint" id="sv-hint"></div>
+    </div>
+
+    <!-- Steam Paneer -->
+    <div class="item-card" style="border-left: 3px solid #f59e0b">
+      <div class="item-name" style="color:#f59e0b">🥟 Steam Paneer</div>
+      <div class="grid-3">
+        <div><label>Price/Plate (₹)</label><input type="number" id="sp-price" placeholder="0" oninput="updateCalc()"></div>
+        <div><label>Plates Bani</label><input type="number" id="sp-made" placeholder="0" oninput="updateCalc()"></div>
+        <div><label>Plates Biki</label><input type="number" id="sp-sold" placeholder="0" oninput="updateCalc()"></div>
+      </div>
+      <div class="item-hint" id="sp-hint"></div>
+    </div>
+
+    <!-- Fry Veg -->
+    <div class="item-card" style="border-left: 3px solid #3b82f6">
+      <div class="item-name" style="color:#3b82f6">🔥 Fry Veg</div>
+      <div class="grid-3">
+        <div><label>Price/Plate (₹)</label><input type="number" id="fv-price" placeholder="0" oninput="updateCalc()"></div>
+        <div><label>Plates Bani</label><input type="number" id="fv-made" placeholder="0" oninput="updateCalc()"></div>
+        <div><label>Plates Biki</label><input type="number" id="fv-sold" placeholder="0" oninput="updateCalc()"></div>
+      </div>
+      <div class="item-hint" id="fv-hint"></div>
+    </div>
+
+    <!-- Fry Paneer -->
+    <div class="item-card" style="border-left: 3px solid #a855f7">
+      <div class="item-name" style="color:#a855f7">🔥 Fry Paneer</div>
+      <div class="grid-3">
+        <div><label>Price/Plate (₹)</label><input type="number" id="fp-price" placeholder="0" oninput="updateCalc()"></div>
+        <div><label>Plates Bani</label><input type="number" id="fp-made" placeholder="0" oninput="updateCalc()"></div>
+        <div><label>Plates Biki</label><input type="number" id="fp-sold" placeholder="0" oninput="updateCalc()"></div>
+      </div>
+      <div class="item-hint" id="fp-hint"></div>
+    </div>
+
+    <!-- Summary Bar -->
+    <div class="summary-bar">
+      <div><div class="summary-lbl">Total Bani</div><div class="summary-num" id="total-made" style="color:#888">0</div><div class="summary-lbl">plates</div></div>
+      <div><div class="summary-lbl">Total Biki</div><div class="summary-num" id="total-sold" style="color:#22c55e">0</div><div class="summary-lbl">plates</div></div>
+      <div><div class="summary-lbl">Waste</div><div class="summary-num" id="total-waste" style="color:#ef4444">0</div><div class="summary-lbl">plates</div></div>
+    </div>
+    <div class="total-revenue">Total Revenue: <span id="total-revenue">₹0</span></div>
+  </div>
+
+  <!-- ===== EXPENSES TAB ===== -->
+  <div id="page-expenses" class="page">
+    <div class="section-title"><span>💸 Aaj ke Expenses</span></div>
+
+    <!-- Ingredients -->
+    <div class="card" style="border-left: 3px solid #f59e0b">
+      <div class="card-title" style="color:#f59e0b">🧅 Ingredients</div>
+      <div class="grid-2">
+        <div><label>Total Kharida (₹)</label><input type="number" id="ing-total" placeholder="0" oninput="updateCalc()"></div>
+        <div><label>Bacha hua value (₹)</label><input type="number" id="ing-left" placeholder="0" oninput="updateCalc()"></div>
+      </div>
+      <div class="exp-breakdown" id="ing-breakdown" style="display:none">
+        <div class="exp-row"><span style="color:#888">Kharid</span><span id="bd-kharid">₹0</span></div>
+        <div class="exp-row"><span style="color:#22c55e">➖ Bacha (kal kaam aayega)</span><span id="bd-bacha" style="color:#22c55e">-₹0</span></div>
+        <div class="exp-row" id="bd-waste-row" style="display:none"><span style="color:#ef4444">➖ Waste cost</span><span id="bd-waste" style="color:#ef4444">-₹0</span></div>
+        <div class="exp-total"><span>Actual Cost</span><span id="bd-actual" style="color:#ef4444">₹0</span></div>
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 3px solid #3b82f6">
+      <div class="card-title" style="color:#3b82f6">⛽ Gas / Fuel</div>
+      <input type="number" id="exp-gas" placeholder="₹0" oninput="updateCalc()">
+    </div>
+
+    <div class="card" style="border-left: 3px solid #8b5cf6">
+      <div class="card-title" style="color:#8b5cf6">📦 Packaging</div>
+      <input type="number" id="exp-pack" placeholder="₹0" oninput="updateCalc()">
+    </div>
+
+    <div class="card" style="border-left: 3px solid #64748b">
+      <div class="card-title" style="color:#64748b">🔧 Other</div>
+      <input type="number" id="exp-other" placeholder="₹0" oninput="updateCalc()">
+    </div>
+
+    <div class="card" style="border-left: 3px solid #ff6b00">
+      <div class="row"><span style="color:#888">🏠 Setup Recovery (₹15000 ÷ 30)</span><span style="color:#ff6b00">₹500 fixed</span></div>
+      <div class="row" style="font-weight:800; font-size:16px; margin-top:8px">
+        <span>Total Expenses</span>
+        <span style="color:#ef4444" id="grand-expense">₹0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DRAWINGS TAB ===== -->
+  <div id="page-drawings" class="page">
+    <div class="section-title">
+      <span>💵 Drawing Tracker</span>
+      <span class="section-sub">Kisne kab paise liye</span>
+    </div>
+
+    <!-- Add new -->
+    <div class="card">
+      <div style="font-weight:600; color:#ff6b00; margin-bottom:10px; font-size:13px">+ Nayi Entry</div>
+      <div class="grid-2" style="margin-bottom:8px">
+        <div><label>Naam</label><input type="text" id="d-name" placeholder="Partner ka naam"></div>
+        <div><label>Amount (₹)</label><input type="number" id="d-amount" placeholder="0"></div>
+      </div>
+      <div style="margin-bottom:10px"><label>Kyun liya</label><input type="text" id="d-reason" placeholder="Gas lene gaya, maal kharida..."></div>
+      <button class="btn-orange" onclick="addDrawing()">Add Drawing</button>
+    </div>
+
+    <div id="drawings-list"></div>
+    <div id="drawings-total" style="display:none" class="card">
+      <div class="row" style="font-weight:700; font-size:15px">
+        <span>Total Drawing</span>
+        <span style="color:#ef4444" id="drawings-total-amt">₹0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RESULT TAB ===== -->
+  <div id="page-result" class="page">
+    <div class="status-center">
+      <div class="status-date" id="res-date"></div>
+      <div class="status-text" id="res-status"></div>
+    </div>
+
+    <!-- Revenue -->
+    <div class="result-section" style="background:#0f2d1a; border:1px solid #22c55e22">
+      <div class="result-section-title" style="color:#22c55e">💰 REVENUE</div>
+      <div id="rev-breakdown"></div>
+      <div class="row" style="border-top:1px solid #1a3a1a; padding-top:8px; margin-top:4px; font-weight:800">
+        <span>Total Revenue</span>
+        <span style="color:#22c55e; font-size:17px" id="res-revenue">₹0</span>
+      </div>
+    </div>
+
+    <!-- Expenses -->
+    <div class="result-section" style="background:#2d1a0f; border:1px solid #ef444422">
+      <div class="result-section-title" style="color:#ef4444">💸 EXPENSES</div>
+      <div id="exp-breakdown-result"></div>
+    </div>
+
+    <!-- Waste -->
+    <div class="result-section" id="res-waste-section" style="background:#2d1a00; border:1px solid #f59e0b22; display:none">
+      <div class="result-section-title" style="color:#f59e0b">🗑️ WASTE</div>
+      <div id="res-waste-detail"></div>
+    </div>
+
+    <!-- Setup -->
+    <div class="result-section" style="background:#1a1a2d; border:1px solid #ff6b0022">
+      <div class="result-section-title" style="color:#ff6b00">🏠 SETUP RECOVERY</div>
+      <div class="row"><span style="color:#ccc">₹15,000 ÷ 30 din</span><span style="color:#ff6b00">₹500</span></div>
+    </div>
+
+    <!-- Calculation -->
+    <div class="net-box">
+      <div class="net-calc-title">🧮 CALCULATION</div>
+      <div id="calc-breakdown"></div>
+      <div class="net-total">
+        <span id="net-label">Net PROFIT</span>
+        <span id="net-amount">₹0</span>
+      </div>
+      <div class="per-person">
+        <span style="color:#888">👤 Per Person (÷4)</span>
+        <span style="font-weight:800; font-size:18px" id="per-person">₹0</span>
+      </div>
+    </div>
+
+    <!-- Drawing warning -->
+    <div class="warning-box" id="drawing-warn" style="display:none">
+      <div style="color:#f59e0b; font-weight:700">⚠️ Drawing Alert</div>
+      <div style="font-size:12px; color:#888; margin-top:4px" id="drawing-warn-text"></div>
+      <div style="font-size:11px; color:#666; margin-top:4px" id="drawing-warn-pending"></div>
+    </div>
+
+    <br>
+    <button class="btn-orange" onclick="saveDay()">💾 Aaj ka Data Save Karo</button>
+  </div>
+
+  <!-- ===== HISTORY TAB ===== -->
+  <div id="page-history" class="page">
+    <div class="section-title">
+      <span>📂 History</span>
+      <span class="section-sub">Pichle din</span>
+    </div>
+    <div id="history-list" class="history-scroll"></div>
+    <div id="history-empty" class="empty">Abhi koi saved data nahi hai<br><small style="color:#555">Result tab se Save karo</small></div>
+    <div id="clear-all-btn" style="display:none; margin-top:16px">
+      <button onclick="clearAllData()"
+        style="width:100%; background:#1a0a0a; color:#ef4444; border:1px solid #ef444433; border-radius:10px; padding:12px; font-size:13px; font-weight:700; cursor:pointer">
+        🗑️ Sabka Data Delete Karo
+      </button>
+    </div>
+  </div>
+
+</div><!-- end content -->
+
+<!-- Save notification -->
+<div id="save-notif">✅ Data Save Ho Gaya!</div>
+
+<script>
+// ─── CONSTANTS ───────────────────────────────────────────
+const SETUP_COST   = 15000;
+const RECOVERY_DAYS = 30;
+const DAILY_SETUP  = SETUP_COST / RECOVERY_DAYS;
+
+const ITEMS = [
+  { id: "sv", label: "Steam Veg",    color: "#22c55e" },
+  { id: "sp", label: "Steam Paneer", color: "#f59e0b" },
+  { id: "fv", label: "Fry Veg",      color: "#3b82f6" },
+  { id: "fp", label: "Fry Paneer",   color: "#a855f7" },
+];
+
+// ─── JSONBIN CONFIG ───────────────────────────────────────
+const BIN_ID  = "6a2d5648da38895dfeba17b6";
+const API_KEY = "$2a$10$yVBAOxsB3VU3eSNHOEWmO.G324BCvfW5oAa9VH6tywinGcNvdN9Ji";
+const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+// ─── STATE ───────────────────────────────────────────────
+let drawings    = [];
+let currentDate = new Date().toISOString().split("T")[0];
+let cloudData   = { days: {} };
+let saveTimer   = null;
+
+// ─── INIT ────────────────────────────────────────────────
+window.onload = async function() {
+  document.getElementById("main-date").value = currentDate;
+  showSyncStatus("☁️ Cloud se load ho raha hai...", "#f59e0b");
+  await fetchCloudData();
+  loadDayFromCloud(currentDate);
+  renderHistory();
+};
+
+// ─── SYNC STATUS ─────────────────────────────────────────
+function showSyncStatus(msg, color) {
+  const el = document.getElementById("save-notif");
+  el.textContent = msg;
+  el.style.background = color || "#22c55e";
+  el.style.color = color === "#f59e0b" ? "#000" : "#000";
+  el.classList.add("show");
+  if (color === "#22c55e") setTimeout(() => el.classList.remove("show"), 2500);
+}
+function hideSyncStatus() {
+  document.getElementById("save-notif").classList.remove("show");
+}
+
+// ─── FETCH FROM JSONBIN ───────────────────────────────────
+async function fetchCloudData() {
+  try {
+    const res = await fetch(BIN_URL + "/latest", {
+      headers: { "X-Access-Key": API_KEY }
+    });
+    if (!res.ok) throw new Error("Fetch failed");
+    const json = await res.json();
+    cloudData = json.record || { days: {} };
+    if (!cloudData.days) cloudData.days = {};
+    hideSyncStatus();
+  } catch (e) {
+    showSyncStatus("⚠️ Cloud se connect nahi hua — offline mode", "#ef4444");
+    cloudData = { days: {} };
+  }
+}
+
+// ─── PUSH TO JSONBIN ──────────────────────────────────────
+async function pushCloudData() {
+  try {
+    showSyncStatus("☁️ Save ho raha hai...", "#f59e0b");
+    const res = await fetch(BIN_URL, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Access-Key": API_KEY
+      },
+      body: JSON.stringify(cloudData)
+    });
+    if (!res.ok) throw new Error("Push failed");
+    showSyncStatus("✅ Cloud me Save Ho Gaya!", "#22c55e");
+    renderHistory();
+  } catch (e) {
+    showSyncStatus("❌ Save nahi hua — internet check karo", "#ef4444");
+  }
+}
+
+// ─── LOAD DAY FROM CLOUD ──────────────────────────────────
+function loadDayFromCloud(date) {
+  const data = cloudData.days[date];
+  if (data) {
+    ITEMS.forEach(item => {
+      const s = data.sales?.[item.id] || {};
+      setValue(item.id + "-price", s.price || "");
+      setValue(item.id + "-made",  s.made  || "");
+      setValue(item.id + "-sold",  s.sold  || "");
+    });
+    const e = data.expenses || {};
+    setValue("ing-total",  e.ing_total || "");
+    setValue("ing-left",   e.ing_left  || "");
+    setValue("exp-gas",    e.gas       || "");
+    setValue("exp-pack",   e.pack      || "");
+    setValue("exp-other",  e.other     || "");
+    drawings = data.drawings || [];
+  } else {
+    ITEMS.forEach(item => {
+      setValue(item.id + "-price", "");
+      setValue(item.id + "-made",  "");
+      setValue(item.id + "-sold",  "");
+    });
+    setValue("ing-total",""); setValue("ing-left","");
+    setValue("exp-gas",""); setValue("exp-pack",""); setValue("exp-other","");
+    drawings = [];
+  }
+  renderDrawings();
+  updateCalc();
+}
+
+function setValue(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+// ─── COLLECT DATA ─────────────────────────────────────────
+function collectData() {
+  const sales = {};
+  ITEMS.forEach(item => {
+    sales[item.id] = {
+      price: g(item.id + "-price"),
+      made:  g(item.id + "-made"),
+      sold:  g(item.id + "-sold"),
+    };
+  });
+  return {
+    date: currentDate,
+    sales,
+    expenses: {
+      ing_total: g("ing-total"),
+      ing_left:  g("ing-left"),
+      gas:       g("exp-gas"),
+      pack:      g("exp-pack"),
+      other:     g("exp-other"),
+    },
+    drawings,
+  };
+}
+
+// ─── AUTO SAVE (debounced) ────────────────────────────────
+function autoSave() {
+  cloudData.days[currentDate] = collectData();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => pushCloudData(), 2000); // 2 sec baad save
+}
+
+// ─── MANUAL SAVE ─────────────────────────────────────────
+async function saveDay() {
+  cloudData.days[currentDate] = collectData();
+  await pushCloudData();
+}
+
+// ─── DATE CHANGE ─────────────────────────────────────────
+function onDateChange() {
+  currentDate = document.getElementById("main-date").value;
+  loadDayFromCloud(currentDate);
+}
+
+// ─── TAB SWITCHING ───────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("page-" + tab).classList.add("active");
+  btn.classList.add("active");
+  if (tab === "result")  renderResult();
+  if (tab === "history") renderHistory();
+}
+
+// ─── HELPERS ─────────────────────────────────────────────
+function g(id)    { return document.getElementById(id)?.value || ""; }
+function n(id)    { return parseFloat(g(id)) || 0; }
+function fmt(val) { return "₹" + Math.abs(val).toLocaleString("en-IN", { maximumFractionDigits: 0 }); }
+
+// ─── CALCULATE ────────────────────────────────────────────
+function calcAll() {
+  const sales = {};
+  let totalMade = 0, totalSold = 0, revenue = 0;
+  ITEMS.forEach(item => {
+    const price = n(item.id + "-price");
+    const made  = n(item.id + "-made");
+    const sold  = n(item.id + "-sold");
+    sales[item.id] = { price, made, sold, rev: price * sold };
+    totalMade += made;
+    totalSold += sold;
+    revenue   += price * sold;
+  });
+  const totalWaste = totalMade - totalSold;
+  const ingTotal   = n("ing-total");
+  const ingLeft    = n("ing-left");
+  const costPer    = totalMade > 0 ? ingTotal / totalMade : 0;
+  const wasteCost  = totalWaste * costPer;
+  const ingActual  = ingTotal - ingLeft - wasteCost;
+  const gas        = n("exp-gas");
+  const pack       = n("exp-pack");
+  const other      = n("exp-other");
+  const totalExp   = ingActual + gas + pack + other;
+  const netProfit  = revenue - totalExp - wasteCost - DAILY_SETUP;
+  const perPerson  = netProfit / 4;
+  const totalDraw  = drawings.reduce((s, d) => s + (parseFloat(d.amount) || 0), 0);
+  return { sales, totalMade, totalSold, totalWaste, revenue,
+           ingTotal, ingLeft, ingActual, wasteCost, gas, pack, other,
+           totalExp, netProfit, perPerson, totalDraw };
+}
+
+// ─── UPDATE CALC (live) ───────────────────────────────────
+function updateCalc() {
+  const c = calcAll();
+  ITEMS.forEach(item => {
+    const s = c.sales[item.id];
+    const hint = document.getElementById(item.id + "-hint");
+    if (hint && s.made && s.sold) {
+      const waste = s.made - s.sold;
+      hint.innerHTML = `Waste: <span style="color:#ef4444">${waste} plates</span> &nbsp;•&nbsp; Revenue: <span style="color:#22c55e">${fmt(s.rev)}</span>`;
+    } else if (hint) hint.innerHTML = "";
+  });
+  setText("total-made",    c.totalMade);
+  setText("total-sold",    c.totalSold);
+  setText("total-waste",   c.totalWaste);
+  setText("total-revenue", fmt(c.revenue));
+  if (c.ingTotal > 0) {
+    show("ing-breakdown");
+    setText("bd-kharid", fmt(c.ingTotal));
+    setText("bd-bacha",  "-" + fmt(c.ingLeft));
+    if (c.wasteCost > 0) { show("bd-waste-row"); setText("bd-waste", "-" + fmt(c.wasteCost)); }
+    else hide("bd-waste-row");
+    setText("bd-actual", fmt(c.ingActual));
+  } else hide("ing-breakdown");
+  setText("grand-expense", fmt(c.totalExp + c.wasteCost + DAILY_SETUP));
+  if (drawings.length > 0) { show("drawings-total"); setText("drawings-total-amt", fmt(c.totalDraw)); }
+  else hide("drawings-total");
+  autoSave();
+}
+
+// ─── RENDER RESULT ────────────────────────────────────────
+function renderResult() {
+  const c = calcAll();
+  const status      = c.netProfit > 0 ? "PROFIT" : c.netProfit < 0 ? "LOSS" : "NIL";
+  const statusColor = c.netProfit > 0 ? "#22c55e" : c.netProfit < 0 ? "#ef4444" : "#94a3b8";
+  const emoji       = c.netProfit > 0 ? "✅" : c.netProfit < 0 ? "🔴" : "⚪";
+  setText("res-date", currentDate);
+  const statusEl = document.getElementById("res-status");
+  statusEl.textContent = emoji + " " + status;
+  statusEl.style.color = statusColor;
+  let revHtml = "";
+  ITEMS.forEach(item => {
+    const s = c.sales[item.id];
+    if (s.sold > 0) revHtml += `<div class="row"><span style="color:#ccc">${item.label} (${s.sold}×₹${s.price})</span><span style="color:#22c55e">${fmt(s.rev)}</span></div>`;
+  });
+  document.getElementById("rev-breakdown").innerHTML = revHtml;
+  setText("res-revenue", fmt(c.revenue));
+  let expHtml = `<div class="row"><span style="color:#ccc">Ingredients (Kharida)</span><span>${fmt(c.ingTotal)}</span></div>`;
+  if (c.ingLeft   > 0) expHtml += `<div class="row"><span style="color:#22c55e">➖ Bacha hua maal</span><span style="color:#22c55e">-${fmt(c.ingLeft)}</span></div>`;
+  if (c.wasteCost > 0) expHtml += `<div class="row"><span style="color:#f59e0b">🗑 Waste (${c.totalWaste} plates)</span><span style="color:#f59e0b">-${fmt(c.wasteCost)}</span></div>`;
+  expHtml += `<div class="row" style="border-bottom:1px dashed #333;padding-bottom:8px;margin-bottom:8px;font-weight:600"><span>Actual Ingredients</span><span style="color:#ef4444">${fmt(c.ingActual)}</span></div>`;
+  if (c.gas)  expHtml += `<div class="row"><span style="color:#ccc">Gas/Fuel</span><span>${fmt(c.gas)}</span></div>`;
+  if (c.pack) expHtml += `<div class="row"><span style="color:#ccc">Packaging</span><span>${fmt(c.pack)}</span></div>`;
+  if (c.other)expHtml += `<div class="row"><span style="color:#ccc">Other</span><span>${fmt(c.other)}</span></div>`;
+  expHtml += `<div class="row" style="border-top:1px solid #3a1a0f;padding-top:8px;margin-top:4px;font-weight:800"><span>Total Expense</span><span style="color:#ef4444;font-size:17px">${fmt(c.totalExp)}</span></div>`;
+  document.getElementById("exp-breakdown-result").innerHTML = expHtml;
+  if (c.wasteCost > 0) { show("res-waste-section"); document.getElementById("res-waste-detail").innerHTML = `<div class="row"><span>${c.totalWaste} plates waste</span><span style="color:#f59e0b">${fmt(c.wasteCost)}</span></div>`; }
+  else hide("res-waste-section");
+  let calcHtml = `
+    <div class="row"><span style="color:#22c55e">Revenue</span><span style="color:#22c55e">${fmt(c.revenue)}</span></div>
+    <div class="row"><span style="color:#ef4444">➖ Expenses</span><span style="color:#ef4444">-${fmt(c.totalExp)}</span></div>`;
+  if (c.wasteCost > 0) calcHtml += `<div class="row"><span style="color:#f59e0b">➖ Waste</span><span style="color:#f59e0b">-${fmt(c.wasteCost)}</span></div>`;
+  calcHtml += `<div class="row"><span style="color:#ff6b00">➖ Setup Share</span><span style="color:#ff6b00">-${fmt(DAILY_SETUP)}</span></div>`;
+  document.getElementById("calc-breakdown").innerHTML = calcHtml;
+  const netEl = document.getElementById("net-amount");
+  netEl.textContent = (c.netProfit < 0 ? "-" : "") + fmt(c.netProfit);
+  netEl.style.color = statusColor;
+  document.getElementById("net-label").textContent = "Net " + status;
+  const perEl = document.getElementById("per-person");
+  perEl.textContent = (c.perPerson < 0 ? "-" : "") + fmt(c.perPerson);
+  perEl.style.color = statusColor;
+  if (c.totalDraw > 0) {
+    show("drawing-warn");
+    setText("drawing-warn-text", `Aaj ${fmt(c.totalDraw)} drawing hua`);
+    const pending = drawings.filter(d => !d.returned).reduce((s, d) => s + (parseFloat(d.amount)||0), 0);
+    setText("drawing-warn-pending", `Pending: ${fmt(pending)}`);
+  } else hide("drawing-warn");
+}
+
+// ─── DRAWINGS ─────────────────────────────────────────────
+function addDrawing() {
+  const name   = g("d-name").trim();
+  const amount = g("d-amount").trim();
+  const reason = g("d-reason").trim();
+  if (!name || !amount) { alert("Naam aur Amount zaroori hai!"); return; }
+  drawings.push({ id: Date.now(), name, amount, reason, returned: false });
+  setValue("d-name",""); setValue("d-amount",""); setValue("d-reason","");
+  renderDrawings();
+  updateCalc();
+}
+function toggleReturned(id) {
+  drawings = drawings.map(d => d.id === id ? { ...d, returned: !d.returned } : d);
+  renderDrawings(); updateCalc();
+}
+function removeDrawing(id) {
+  drawings = drawings.filter(d => d.id !== id);
+  renderDrawings(); updateCalc();
+}
+function renderDrawings() {
+  const list = document.getElementById("drawings-list");
+  if (drawings.length === 0) { list.innerHTML = '<div class="empty">Aaj koi drawing nahi hua</div>'; return; }
+  list.innerHTML = drawings.map(d => `
+    <div class="drawing-entry" style="border-left:3px solid ${d.returned?'#22c55e':'#ef4444'}">
+      <div><div class="drawing-name">${d.name}</div><div class="drawing-reason">${d.reason||"—"}</div></div>
+      <div style="text-align:right">
+        <div class="drawing-amount" style="color:${d.returned?'#22c55e':'#ef4444'}">${fmt(d.amount)}</div>
+        <div class="drawing-btns">
+          <button class="btn-small" onclick="toggleReturned(${d.id})" style="background:${d.returned?'#1a3a1a':'#1a1a1a'};color:${d.returned?'#22c55e':'#888'}">${d.returned?'✅ Wapas':'❌ Pending'}</button>
+          <button class="btn-small" onclick="removeDrawing(${d.id})" style="background:#1a1a1a;color:#ef4444">🗑</button>
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+// ─── HISTORY ─────────────────────────────────────────────
+function renderHistory() {
+  const list  = document.getElementById("history-list");
+  const empty = document.getElementById("history-empty");
+  const days  = Object.keys(cloudData.days || {}).sort().reverse();
+  if (days.length === 0) {
+    list.innerHTML = "";
+    show("history-empty");
+    hide("clear-all-btn");
+    return;
+  }
+  hide("history-empty");
+  show("clear-all-btn");
+  list.innerHTML = days.map(date => {
+    const data = cloudData.days[date];
+    const c    = calcFromData(data);
+    const status = c.netProfit > 0 ? "✅ PROFIT" : c.netProfit < 0 ? "🔴 LOSS" : "⚪ NIL";
+    const color  = c.netProfit > 0 ? "#22c55e"  : c.netProfit < 0 ? "#ef4444" : "#94a3b8";
+    return `
+      <div class="history-item" style="align-items:flex-start">
+        <div onclick="loadHistoryDay('${date}')" style="flex:1;cursor:pointer">
+          <div class="history-date">📅 ${date}</div>
+          <div class="history-plates">🍱 ${c.totalSold} plates biki • Revenue: ${fmt(c.revenue)}</div>
+        </div>
+        <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div style="font-weight:800;color:${color}">${fmt(c.netProfit)}</div>
+          <div style="font-size:11px;color:${color}">${status}</div>
+          <button class="btn-small" onclick="deleteDay('${date}')" style="background:#3a0a0a;color:#ef4444;padding:4px 10px;border:1px solid #ef444433">🗑 Delete</button>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+function loadHistoryDay(date) {
+  document.getElementById("main-date").value = date;
+  currentDate = date;
+  loadDayFromCloud(date);
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("page-result").classList.add("active");
+  document.querySelectorAll(".tab-btn")[3].classList.add("active");
+  renderResult();
+}
+
+async function deleteDay(date) {
+  if (!confirm(`❗ ${date} ka data delete karna chahte ho?\nYe wapas nahi aayega!`)) return;
+  delete cloudData.days[date];
+  if (date === currentDate) {
+    ITEMS.forEach(item => { setValue(item.id+"-price",""); setValue(item.id+"-made",""); setValue(item.id+"-sold",""); });
+    setValue("ing-total",""); setValue("ing-left","");
+    setValue("exp-gas",""); setValue("exp-pack",""); setValue("exp-other","");
+    drawings = []; renderDrawings(); updateCalc();
+  }
+  await pushCloudData();
+  renderHistory();
+}
+
+async function clearAllData() {
+  if (!confirm("⚠️ SABKA DATA DELETE HOGA!\nKya pakka karna chahte ho?")) return;
+  if (!confirm("Ek baar aur confirm karo — sab hamesha ke liye jayega!")) return;
+  cloudData.days = {};
+  await pushCloudData();
+  renderHistory();
+}
+
+// ─── CALC FROM DATA ───────────────────────────────────────
+function calcFromData(data) {
+  let totalMade = 0, totalSold = 0, revenue = 0;
+  ITEMS.forEach(item => {
+    const s     = data.sales?.[item.id] || {};
+    const price = parseFloat(s.price) || 0;
+    const made  = parseFloat(s.made)  || 0;
+    const sold  = parseFloat(s.sold)  || 0;
+    totalMade += made; totalSold += sold; revenue += price * sold;
+  });
+  const e         = data.expenses || {};
+  const ingTotal  = parseFloat(e.ing_total) || 0;
+  const ingLeft   = parseFloat(e.ing_left)  || 0;
+  const totalWaste = totalMade - totalSold;
+  const costPer   = totalMade > 0 ? ingTotal / totalMade : 0;
+  const wasteCost = totalWaste * costPer;
+  const ingActual = ingTotal - ingLeft - wasteCost;
+  const totalExp  = ingActual + (parseFloat(e.gas)||0) + (parseFloat(e.pack)||0) + (parseFloat(e.other)||0);
+  const netProfit = revenue - totalExp - wasteCost - DAILY_SETUP;
+  return { totalMade, totalSold, revenue, netProfit };
+}
+
+// ─── DOM HELPERS ──────────────────────────────────────────
+function setText(id, val) { const el = document.getElementById(id); if (el) el.textContent = val; }
+function show(id) { const el = document.getElementById(id); if (el) el.style.display = ""; }
+function hide(id) { const el = document.getElementById(id); if (el) el.style.display = "none"; }
+</script>
+</body>
+</html>
